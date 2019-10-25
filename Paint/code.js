@@ -14,7 +14,7 @@ class Ball {
     }
     draw() {
         context.beginPath();
-        context.strokeStyle = "#efef3c";
+        context.strokeStyle = "rgba(0, 217, 255, 0.898)";
         context.lineWidth = 3;
         context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         context.stroke();
@@ -68,6 +68,7 @@ class Game {
     init() {
         this.setActions();
         this.scene = new Scene();
+        this.createFishes();
         this.render();
     }
     setActions() {
@@ -88,9 +89,17 @@ class Game {
         this.balls.push(ball);
     }
     createBox(x, y, direction) {
-        let box = new Box(x, y, direction);
+        let box = new Fish(x, y, direction);
         this.scene.add(box);
         this.boxes.push(box);
+    }
+    createFishes(){
+        for(let i = 0; i < 20; i++) {
+            let x = Math.random()*window.innerWidth;
+            let y = Math.random()*window.innerHeight;
+            let direction = Math.random() > 0.5 ? 1 : -1;
+            this.createBox(x, y, direction);
+            }
     }
     moveAllBalls() {
         this.balls.forEach(ball => ball.update());
@@ -107,14 +116,14 @@ class Game {
     }
 }
 
-class Box {
+class Fish {
     constructor(x = 0, y = 0, direction = 1) {
         this.x = x;
         this.y = y;
         this.speed = 3;
         this.direction = direction;
         this.textures = document.getElementsByClassName("texture");
-        this.currentTexture = 0;
+        this.currentTexture = direction == 1 ? 0 : 1;
     }
     draw() {
         context.beginPath();
@@ -139,8 +148,7 @@ class Box {
             this.direction = -this.direction;
             this.currentTexture = 0;
         }
-        this.move(x, this.y);
-        console.log("heeeeey");
+        this.move(x, this.y)
     }
 
 }
