@@ -11,27 +11,38 @@ class Ball {
         this.updateRadiusStep = 0.5;
         this.direction = Math.random() * Math.PI * 2;
         this.speed = 3;
-    }
-    setShadow(context, color, ox, oy, blur) {
-        context.shadowColor = color;
-        context.shadowOffsetX = ox;
-        context.shadowOffsetY = oy;
-        context.shadowBlur = blur;
+        this.colors = [
+            [36, 206, 167],
+            [226, 17, 142]
+        ];
+        this.color = "rgb(36, 206, 167)";
+        this.shiftColor = Math.random();
+        this.collisions = [];
+        this.lines = [];
     }
     draw() {
         context.beginPath();
-        context.strokeStyle = "rgba(0, 217, 255, 0.898)";
+        context.strokeStyle = this.color;
         context.lineWidth = 3;
         context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        this.setShadow(context, "white", 0, 0, 10);
         context.stroke();
     }
-    
+    updateColor() {
+        let time = game.time;
+        let color1 = this.colors[0];
+        let color2 = this.colors[1];
+        let color = () => {
+            let c = i => Math.cos(time + this.shiftColor) * (color1[i] - color2[i]) / 2 + (color1[i] + color2[i]) / 2;
+            return `rgb(${c(0)}, ${c(1)}, ${c(2)})`;
+        }
+        this.color = color();
+    }
     move(x, y) {
         this.x = x;
         this.y = y;
     }
-    moveByDirection() {
+    moveByDirection(value = 0) {
+        let step = value;
         let x = this.x + this.speed * Math.sin(this.direction);
         let y = this.y + this.speed * Math.cos(this.direction);
         if (x > window.innerWidth + this.radius) x = -this.radius;
@@ -40,17 +51,65 @@ class Ball {
         if (y < -this.radius) y = window.innerHeight + this.radius;
         this.move(x, y);
     }
-    drop() {
-        this.move(this.x, this.y + 1)
-        if (this.y > window.innerHeight) { this.move(this.x, -10) };
-    }
     changeRadius() {
         this.radius += this.updateRadiusStep;
         if (this.radius > 30 || this.radius < 5) this.updateRadiusStep = -this.updateRadiusStep;
     }
+    checkCollision(ball){
+        let distance = Math.getDistance(this, ball);
+            if (ball != this && distance < this.radius + ball.radius && this.collisions.indexOf(ball) == -1) {
+                return true;
+            } 
+            return false;
+    }
     update() {
         this.moveByDirection();
         this.changeRadius();
+        this.updateColor();
+    }
+}
+class Player extends Ball{
+    constructor (){
+        super();
+    }
+    checkCollision(){
+
+    }
+}
+
+class Enemy extends Ball{
+    constructor(x, y) {
+        super(x, y);
+    }
+    onCollision() {
+        game.balls.forEach(ball => {
+            let distance = Math.getDistance(this, ball);
+            if(this.checkCollision(ball)) {
+                ball.collisions.push(this);
+                ball.direction = this.direction;
+                ball.moveByDirection();
+                this.direction += Math.PI;
+                this.moveByDirection();
+            }
+            if (ball != this && distance < 400 && this.lines.indexOf(ball) == -1) {
+                ball.lines.push(this);
+                context.beginPath();
+                var grad = context.createLinearGradient(this.x, this.y, ball.x, ball.y);
+                grad.addColorStop(0, `rgba(128, 0, 128, ${1 -distance / 400})`);
+                grad.addColorStop(1, `rgba(255, 192, 203, ${1- distance / 400})`);
+                context.strokeStyle = grad;
+                context.lineWidth = 2;
+                context.moveTo(this.x, this.y);
+                context.lineTo(ball.x, ball.y);
+                context.stroke();
+            }
+        });
+        this.collisions = [];
+        this.lines = [];
+    }
+    update() {
+        super.update();
+        this.onCollision();
     }
 }
 
@@ -70,94 +129,57 @@ class Scene {
 class Game {
     constructor() {
         this.balls = [];
-        this.fishes = [];
-        this.init();
+        this.time = 0;
+        // this.init();
     }
     init() {
         this.setActions();
         this.scene = new Scene();
-        this.createBall();
-        this.createFishes();
+        this.createEnemy();
         this.render();
+    }
+    updateTime() {
+        this.time += 0.005;
     }
     setActions() {
         $("#paint").click((event) => {
             let x = event.pageX;
             let y = event.pageY;
-            this.createBall(x, y);
-            this.createFish(x, y);
+            this.createEnemy(x, y);
         })
         $(window).resize(() => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         })
+        // $("#paint").mousemove((event) => {
+        //     let x = event.pageX;
+        //     let y = event.pageY;
+        //     this.balls.forEach(ball => {
+        //         context.beginPath();
+        //         context.moveTo(x, y);
+        //         context.lineTo(ball.x, ball.y);
+        //         context.stroke();
+        //     })
+        // })
     }
-    createBall(x, y) {
-        let ball = new Ball(x, y);
+    createEnemy(x, y) {
+        let ball = new Enemy(x, y);
         this.scene.add(ball);
         this.balls.push(ball);
-    }
-    createFish(x, y, direction) {
-        let fish = new Fish(x, y, direction);
-        this.scene.add(fish);
-        this.fishes.push(fish);
-    }
-    createFishes(){
-        for(let i = 0; i < 20; i++) {
-            let x = Math.random()*window.innerWidth;
-            let y = Math.random()*window.innerHeight;
-            let direction = Math.random() > 0.5 ? 1 : -1;
-            this.createFish(x, y, direction);
-            }
     }
     moveAllBalls() {
         this.balls.forEach(ball => ball.update());
     }
-    moveAllFishes() {
-        this.fishes.forEach(fish => fish.moveByDirection());
-    }
     render() {
         requestAnimationFrame(this.render.bind(this)); // это то же самое, что и сет интервал
+        this.updateTime();
         context.clearRect(0, 0, window.innerWidth, window.innerHeight);
         this.moveAllBalls();
-        this.moveAllFishes();
         this.scene.draw();
     }
 }
 
-class Fish {
-    constructor(x = 0, y = 0, direction = 1) {
-        this.x = x;
-        this.y = y;
-        this.speed = 3;
-        this.direction = direction;
-        this.textures = document.getElementsByClassName("texture");
-        this.currentTexture = direction == 1 ? 0 : 1;
-    }
-    draw() {
-        context.beginPath();
-        // context.fillStyle = "#efef3c";
-        // context.rect(this.x, this.y, 15, 15);
-        // context.fill();
-        context.drawImage(this.textures[this.currentTexture], this.x, this.y);
-    }
-    move(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    moveByDirection() {
-        let x = this.x + this.speed * this.direction;
-        if (x > window.innerWidth + 3) { 
-            this.direction = -this.direction; 
-            this.currentTexture = 1;
-        }
-        if (x < 0) { 
-            this.direction = -this.direction;
-            this.currentTexture = 0;
-        }
-        this.move(x, this.y)
-    }
 
-}
+var game = new Game();
+game.init();
 
-let game = new Game();
