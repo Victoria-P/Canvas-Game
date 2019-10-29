@@ -1,20 +1,20 @@
 import Enemy from "./enemy";
 import Canvas from "./canvas";
 import Scene from "./scene";
+import Player from "./player";
 
 class Game {
     public balls: Array<Enemy>;
+    public players: Array<Player>;
     public time: number;
-    private scene: Scene;
+    public scene: Scene;
+
     constructor() {
-        this.balls = [];
-        this.time = 0;
     }
     init() {
         Canvas.updateSize();
         this.setActions();
-        this.scene = new Scene();
-        this.createEnemy();
+        this.restart();
         this.render();
     }
     updateTime() {
@@ -25,7 +25,8 @@ class Game {
             let x = event.pageX;
             let y = event.pageY;
             this.createEnemy(x, y);
-        })
+        });
+        
         $(window).resize(() => {
             Canvas.updateSize();
         })
@@ -45,14 +46,36 @@ class Game {
         this.scene.add(ball);
         this.balls.push(ball);
     }
+    createPlayer(x = 0, y = 0) {
+        let player = new Player(x, y);
+        this.scene.add(player);
+        this.players.push(player);
+    }
     moveAllBalls() {
         this.balls.forEach(ball => ball.update());
     }
+    moveAllPlayers() {
+        this.players.forEach(player => player.update());
+    }
+    killPlayer(player: Player){
+        this.scene.remove(player);
+        let index = this.players.indexOf(player);
+        this.players.splice(index, 1);
+        this.restart();
+    }
+    restart(){
+        this.balls = [];
+        this.players = [];
+        this.time = 0;
+        this.scene = new Scene();
+        this.createPlayer();
+    }
     render() {
-        requestAnimationFrame(this.render.bind(this)); // это то же самое, что и сет интервал
+        requestAnimationFrame(this.render.bind(this));
         this.updateTime();
         Canvas.context.clearRect(0, 0, window.innerWidth, window.innerHeight);
         this.moveAllBalls();
+        this.moveAllPlayers();
         this.scene.draw();
     }
 }
