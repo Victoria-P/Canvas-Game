@@ -9,8 +9,8 @@ class Ball {
     public direction;
     public speed;
     public color;
-    private colors;
-    private shiftColor;
+    public colors;
+    public shiftColor;
     
     constructor(x = 0, y = 0) {
         this.x = x;
@@ -37,10 +37,9 @@ class Ball {
         this.x = x;
         this.y = y;
     }
-    moveByDirection(value = 0) {
-        let step = value;
-        let x = this.x + this.speed * Math.sin(this.direction);
-        let y = this.y + this.speed * Math.cos(this.direction);
+    moveByDirection() {
+        let x = this.x - this.speed * Math.sin(this.direction);
+        let y = this.y - this.speed * Math.cos(this.direction);
         if (x > window.innerWidth + this.radius) x = -this.radius;
         if (x < -this.radius) x = window.innerWidth + this.radius;
         if (y > window.innerHeight + this.radius) y = -this.radius;
@@ -59,6 +58,7 @@ class Ball {
     }
     update() {
         this.moveByDirection();
+        this.updateColor();
     }
 }
 export default Ball;

@@ -7,8 +7,8 @@ class Meteor {
     public radius;
     public angle;
     public updateRadiusStep;
-    private color;
-    private speed;
+    public color;
+    public speed;
 
     constructor(parent) {
         this.x = parent.x;
@@ -23,7 +23,6 @@ class Meteor {
     draw() {
         Canvas.context.beginPath();
         Canvas.context.fillStyle = this.color;
-        Canvas.context.lineWidth = 3;
         Canvas.context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         Canvas.context.fill();
     }

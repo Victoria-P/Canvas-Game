@@ -49,6 +49,11 @@ class Enemy extends Ball {
         this.collisions = [];
         this.lines = [];
     }
+    getPointPositionByAngle(point){
+        let angle = Utils.getAngle(point, this);
+        let x = this.x - this.radius * Math.sin(angle);
+        let y = this.y - this.radius * Math.cos(angle);
+    }
     die() {
         this.isDead = true;
         this.onDeath().then(() => {
