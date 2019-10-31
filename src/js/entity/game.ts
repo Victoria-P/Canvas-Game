@@ -12,8 +12,11 @@ class Game {
     public players: Array<Player>;
     public time: number;
     public scene: Scene;
+    private isOver: boolean = false;
+    private gameOverUI;
 
     constructor() {
+        this.gameOverUI = $("#gameover-popup");
     }
     init() {
         Canvas.updateSize();
@@ -25,10 +28,8 @@ class Game {
         this.time += 0.005;
     }
     setActions() {
-        $("#scene").click((event) => {
-            let x = event.pageX;
-            let y = event.pageY;
-            this.createEnemy(x, y);
+        $("#restart").click((event) => {
+            this.restart();
         });
         
         $(window).resize(() => {
@@ -67,8 +68,10 @@ class Game {
         this.scene.remove(player);
         let index = this.players.indexOf(player);
         this.players.splice(index, 1);
-        this.restart();
+        this.isOver = true;
+        // this.gameOverUI.show();
     }
+
     restart(){
         this.bubbles = [];
         this.balls = [];
@@ -76,13 +79,25 @@ class Game {
         this.time = 0;
         this.scene = new Scene();
         this.addBubbles();
-        this.createPlayer();
-
+        this.createPlayer(window.innerWidth / 2, window.innerHeight / 2);
+        this.generateEnemies();
+        this.isOver = false;
+        // this.gameOverUI.hide();
+    }
+    generateEnemies(){
+        setInterval(() => {
+            if(this.balls.length == 20) return;
+            let x = Math.random() * window.innerWidth;
+            let y = Math.random() * window.innerHeight;
+            this.createEnemy(x, y);
+        }, 2000)
     }
     render() {
         requestAnimationFrame(this.render.bind(this));
         this.updateTime();
-        Canvas.context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        Canvas.context.globalAlpha=0.5;
+        Canvas.context.fillStyle = "#000000";
+        Canvas.context.fillRect(0, 0, window.innerWidth, window.innerHeight);
         this.moveAllBalls();
         this.moveAllPlayers();
         this.moveAllBubbles();

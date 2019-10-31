@@ -9,14 +9,21 @@ class Bubbles extends Ball {
 
     constructor(x = 0, y = 0) {
         super(x, y);
-        this.radius = 1;
+        this.radius = 3;
         this.colors = [
-            [128, 48, 231, 0],
-            [17, 3, 36, 0]
+            [128, 48, 231, 0.3],
+            [17, 3, 36, 0.3]
         ];
         this.collisions = [];
         this.lines = [];
         this.speed = 0.5;
+    }
+    draw() {
+        Canvas.context.beginPath();
+        Canvas.context.fillStyle = this.color;
+        Canvas.context.lineWidth = 3;
+        Canvas.context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        Canvas.context.fill();
     }
     updateColor() {
         let time = Global.game.time;
@@ -45,12 +52,13 @@ class Bubbles extends Ball {
                 this.moveByDirection();
             }
             let distance = Utils.getDistance(this, bubble);
-            if (bubble != this && distance < 20 && this.lines.indexOf(bubble) == -1) {
+            let maxDistance = 30;
+            if (bubble != this && distance < maxDistance && this.lines.indexOf(bubble) == -1) {
                 bubble.lines.push(this);
                 Canvas.context.beginPath();
                 var grad = Canvas.context.createLinearGradient(this.x, this.y, bubble.x, bubble.y);
-                grad.addColorStop(0, `rgba(128, 0, 128, ${1 - distance / 20})`);
-                grad.addColorStop(1, `rgba(255, 192, 203, ${1 - distance / 20})`);
+                grad.addColorStop(0, `rgba(128, 0, 128, ${1 - distance / maxDistance})`);
+                grad.addColorStop(1, `rgba(255, 192, 203, ${1 - distance / maxDistance})`);
                 Canvas.context.strokeStyle = grad;
                 Canvas.context.lineWidth = 2;
                 Canvas.context.moveTo(this.x, this.y);
@@ -58,6 +66,8 @@ class Bubbles extends Ball {
                 Canvas.context.stroke();
             }
         });
+        this.lines = [];
+        this.collisions = [];
     }
     update() {
         this.moveByDirection();

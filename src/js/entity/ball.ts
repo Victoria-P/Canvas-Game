@@ -11,14 +11,18 @@ class Ball {
     public color;
     public colors;
     public shiftColor;
+    public colorArr;
+    public state;
     
     constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
         this.radius = 15;
         this.direction = Math.random() * Math.PI * 2;
+        this.state = 0;
         this.speed = 3;
         this.color = "rgb(36, 206, 167)";
+        this.colorArr = [36, 206, 167];
         this.colors = [
             [36, 206, 167],
             [226, 17, 142]
@@ -48,13 +52,15 @@ class Ball {
     }
     updateColor() {
         let time = Global.game.time;
+        this.state = Math.cos(Global.game.time + this.shiftColor);
         const color1 = this.colors[0];
         const color2 = this.colors[1];
         let color = () => {
-            let c = i => Math.cos(time + this.shiftColor) * (color1[i] - color2[i]) / 2 + (color1[i] + color2[i]) / 2;
-            return `rgb(${c(0)}, ${c(1)}, ${c(2)})`;
+            let c = i => this.state * (color1[i] - color2[i]) / 2 + (color1[i] + color2[i]) / 2;
+            return [c(0), c(1), c(2)];
         }
-        this.color = color();
+        this.colorArr = color();
+        this.color = `rgb(${this.colorArr[0]}, ${this.colorArr[1]}, ${this.colorArr[2]})`;
     }
     update() {
         this.moveByDirection();

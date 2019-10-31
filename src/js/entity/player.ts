@@ -33,6 +33,8 @@ class Player extends Ball {
     constructor(x, y) {
         super(x, y);
         this.radius = 20;
+        this.direction = 0;
+        this.speed = 0;
         this.meteors = [];
         this.rectangles = [];
         this.leftSideColor = "#51c7f9";
@@ -123,18 +125,18 @@ class Player extends Ball {
         let meteor = new Meteor(this);
         this.meteors.push(meteor);
     }
-    createRectangle() {
-        let rectangle = new Rectangle(this.x, this.y, this.direction);
+    createRectangle(x, y, direction, color?) {
+        let rectangle = new Rectangle(x, y, direction, color);
         this.rectangles.push(rectangle);
     }
     dropRectangles(){
         setInterval(() => {
-            this.createRectangle();
+            this.createRectangle(this.x, this.y, this.direction);
         }, 50)
     }
     checkCollision(ball) {
         let distance = Utils.getDistance(this, ball);
-        if (ball != this && distance < this.radius + ball.radius + 20) {
+        if (ball != this && distance < this.radius + ball.radius) {
             return true;
         }
         return false;
@@ -142,8 +144,11 @@ class Player extends Ball {
     onCollision() {
         Global.game.balls.forEach(ball => {
             if (this.checkCollision(ball) && ball.isDead == false) {
-                if (false) {
-                    Global.game.killPlayer(this);
+                if (ball.state < -0) {
+                    if(this.meteors.length){
+                        this.meteors.splice(0, 1);
+                        this.eatBall(ball);
+                    } else{ Global.game.killPlayer(this); }
                 } else {
                     this.eatBall(ball);
                     this.createMeteor();
@@ -153,6 +158,11 @@ class Player extends Ball {
         });
     }
     eatBall(ball) {
+        let angle = 0;
+        for(let i = 0; i < 30; i++){
+            this.createRectangle(ball.x, ball.y, angle, ball.colorArr);
+            angle += Math.PI * 2 / 30;
+         }
         ball.die();
     }
 }

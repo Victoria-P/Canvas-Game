@@ -3,16 +3,18 @@ import Canvas from "./canvas";
 class Rectangle{
     public x;
     public y;
-    private color;
+    public color;
     public alpha;
+    private colorArr;
     private direction;
     private speed;
 
-    constructor(x, y, direction){
+    constructor(x, y, direction, color?){
         this.x = x;
         this.y = y;
         this.alpha = 1;
         this.color = `rgba(248, 4, 106, ${this.alpha})`;
+        this.colorArr = color || [248, 4, 106];
         this.direction = -direction + Math.random() * Math.PI - Math.PI / 2;
         this.speed = 1;
     }
@@ -28,8 +30,8 @@ class Rectangle{
         this.draw();
     }
     updateColor(){
-        this.alpha -= 0.02;
-        this.color = `rgba(248, 4, 106, ${this.alpha})`;
+        this.alpha -= 0.008;
+        this.color = `rgba(${this.colorArr[0]}, ${this.colorArr[1]}, ${this.colorArr[2]}, ${this.alpha})`;
     }
     move(x, y) {
         this.x = x;

@@ -37,8 +37,8 @@ class Enemy extends Ball {
                 ball.lines.push(this);
                 Canvas.context.beginPath();
                 var grad = Canvas.context.createLinearGradient(this.x, this.y, ball.x, ball.y);
-                grad.addColorStop(0, `rgba(128, 0, 128, ${1 - distance / 400})`);
-                grad.addColorStop(1, `rgba(255, 192, 203, ${1 - distance / 400})`);
+                grad.addColorStop(0, `rgba(202, 10, 241, ${1 - distance / 400})`);
+                grad.addColorStop(1, `rgba(241, 10, 99, ${1 - distance / 400})`);
                 Canvas.context.strokeStyle = grad;
                 Canvas.context.lineWidth = 2;
                 Canvas.context.moveTo(this.x, this.y);
@@ -56,23 +56,23 @@ class Enemy extends Ball {
     }
     die() {
         this.isDead = true;
-        this.onDeath().then(() => {
+        // this.onDeath().then(() => {
             Global.game.scene.remove(this);
             let index = Global.game.balls.indexOf(this);
             Global.game.balls.splice(index, 1);
-        })
+        // })
     }
-    onDeath() {
-        return new Promise(resolve => {
-            let animation = setInterval(() => {
-                this.radius -= 0.8;
-                if (this.radius <= 3) { 
-                    clearInterval(animation);
-                    resolve(true);
-                 }
-            }, 16);
-        })
-    }
+    // onDeath() {
+    //     return new Promise(resolve => {
+    //         let animation = setInterval(() => {
+    //             this.radius -= 0.8;
+    //             if (this.radius <= 3) { 
+    //                 clearInterval(animation);
+    //                 resolve(true);
+    //              }
+    //         }, 16);
+    //     })
+    // }
     changeRadius() {
         this.radius += this.updateRadiusStep;
         if (this.radius > 30 || this.radius < 5) this.updateRadiusStep = -this.updateRadiusStep;
